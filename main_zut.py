@@ -2,7 +2,7 @@ from evolution_zut import evolution_step
 from tqdm import tqdm 
 
 if __name__ == "__main__":
-    NUM_TREES = 100
+    NUM_TREES = 1000
     NUM_GENERATIONS = 100
     FUNCTION_SET = ["food_left", "food_right", "food_front", "danger_left", "danger_right", "danger_front",
                     "current_up", "current_down", "current_left", "current_right"]

@@ -55,22 +55,26 @@ def run_game_with_tree(tree, visualize=False, size=20, max_moves=1000):
     return final_fitness, game.score
 
 
-def tournament_selection(population, group_fraction=0.3):
-    import math
+
+def tournament_selection(population):
     if len(population) == 0:
         raise ValueError("Die Population ist leer. Überprüfe die vorherigen Schritte.")
-    num_groups = math.ceil(len(population) * group_fraction)
-    group_size = len(population) // num_groups
-    extra_individuals = len(population) % num_groups
+    if len(population) % 2 != 0:
+        raise ValueError("Die Population muss eine gerade Anzahl an Individuen enthalten.")
+
     winners = []
+
+    # Shuffle the population to randomize pairings
     random.shuffle(population)
-    start_index = 0
-    for i in range(num_groups):
-        current_group_size = group_size + (1 if i < extra_individuals else 0)
-        group = population[start_index:start_index + current_group_size]
-        start_index += current_group_size
-        best = max(group, key=lambda x: x[1])
-        winners.append(best)
+
+    # Conduct 1v1 tournaments
+    for i in range(0, len(population), 2):
+        pair = population[i:i + 2]  # Take two individuals
+        if len(pair) == 2:
+            # Determine the winner of this match
+            winner = max(pair, key=lambda x: x[1])
+            winners.append(winner)
+
     return winners
 
 
@@ -100,7 +104,7 @@ def evolution_step(current_generation=None, num_trees=100, function_set=None, ac
     print("Tree Fitness Generation", tree_fitness)
 
 
-    #print(len(tree_fitness))
+    print(len(tree_fitness))
     best_fitness = -1
     best_tree = -1
     best_score = -1
@@ -113,6 +117,7 @@ def evolution_step(current_generation=None, num_trees=100, function_set=None, ac
 
     
     print(f"Generation {generation}: Bester Score: {best_score}, Beste Fitness: {best_fitness}")
-    winners = tournament_selection(tree_fitness, group_fraction=0.3)
+    winners = tournament_selection(tree_fitness)
+    print(len(winners))
     current_generation = create_next_generation(winners, function_set, action_set, max_depth)
     return current_generation, best_fitness, best_score, best_tree

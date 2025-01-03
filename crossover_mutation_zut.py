@@ -4,32 +4,19 @@ from fitness_zut import calculate_fitness  # Fitness-Berechnung importiert
 
 # Funktion zur Erstellung der nächsten Generation basierend auf Vergleich, Mutation und Crossover
 def create_next_generation(current_generation, function_set, action_set, max_depth=6):
-    """
-    Erzeugt die nächste Generation, indem zufällige Paare verglichen, mutiert, gekreuzt und neue Individuen erstellt werden.
-
-    :param current_generation: Liste der aktuellen Generation (Individuen mit Fitness)
-    :param function_set: Mögliche Bedingungen für die Bäume
-    :param action_set: Mögliche Aktionen für die Blätter
-    :param max_depth: Maximale Tiefe für Bäume
-    :return: Liste der neuen Generation
-    """
     next_generation = []
 
-    # Vergleich in Paaren und Auswahl der Gewinner
-    winners = []
-    for _ in range(len(current_generation) // 2):
-        ind1, ind2 = random.sample(current_generation, 2)  # Zwei Individuen auswählen
-        winner = ind1 if ind1[1] > ind2[1] else ind2  # Das bessere Individuum bestimmen
-        winners.append(winner)
+    # Pair comparison and winner selection
+    winners = current_generation
 
-    # 2/5 der Gewinner zufällig auswählen und mutieren
+    # 2/5 of winners for mutation
     num_mutations = len(winners) * 2 // 5
     mutated = [
         (mutate_tree(random.choice(winners)[0], function_set, action_set, max_depth), 0)
         for _ in range(num_mutations)
     ]
 
-    # 2/5 der Gewinner zufällig auswählen für Crossover
+    # 2/5 of winners for crossover
     num_crossover = len(winners) * 2 // 5
     crossovered = []
     for _ in range(num_crossover // 2):
@@ -38,19 +25,19 @@ def create_next_generation(current_generation, function_set, action_set, max_dep
         crossovered.append((child1, 0))
         crossovered.append((child2, 0))
 
-    # Neue Individuen generieren (10% der ursprünglichen Generation)
-    num_new = len(current_generation) // 10
+    # Generate new individuals (10% of original population)
+    num_new = len(current_generation*2) // 10
     new_individuals = [
         (generate_random_dt(function_set, action_set, max_depth), 0)
         for _ in range(num_new)
     ]
 
-    # Zusammenfügen der neuen Generation
+    #print("Winners, Mutated, crossover,new",len(winners), len(mutated), len(crossovered), len(new_individuals))
+
+    # Combine all individuals
     next_generation = winners + mutated + crossovered + new_individuals
 
-    # Sicherstellen, dass die Größe der nächsten Generation gleich der aktuellen ist
-    next_generation = next_generation[:len(current_generation)]
-
+    #print(len(next_generation))
     return next_generation
 
 # Funktion zur Mutation eines Entscheidungsbaums
