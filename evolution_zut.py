@@ -5,7 +5,7 @@ import gui_zut
 import random
 from fitness_zut import calculate_fitness
 from crossover_mutation_zut import create_next_generation
-
+from multiprocessing import Pool, cpu_count
 
 def run_game_with_tree(tree, visualize=False, size=20, max_moves=1000):
     game = snake(size)
@@ -38,6 +38,8 @@ def run_game_with_tree(tree, visualize=False, size=20, max_moves=1000):
         variables["current_left"] = game.direction == LEFT
         variables["current_right"] = game.direction == RIGHT
 
+
+
         action = tree.return_action(variables)
 
         relative_directions = {
@@ -51,7 +53,9 @@ def run_game_with_tree(tree, visualize=False, size=20, max_moves=1000):
         game.direction = new_direction
         move_count += 1
 
-    final_fitness = calculate_fitness(game.score, move_count, score_weight=1.0, time_weight=0.5)
+    final_fitness = calculate_fitness(game.score, move_count)
+    if visualize:
+        gui_zut.visualize_snake_game(snake_history,food_history,(20,20), 0.1)
     return final_fitness, game.score
 
 
@@ -78,6 +82,22 @@ def tournament_selection(population):
     return winners
 
 
+def evaluate_tree(tree):
+    """Evaluate the fitness of a single tree."""
+    try:
+        fitness, score = run_game_with_tree(tree)  # Verwende nur den Baum
+        return (tree, fitness, score)
+    except Exception as e:
+        print(f"Fehler beim Ausführen von run_game_with_tree: {e}, Baum: {tree}")
+        return None  # Return None for failed evaluations
+
+def parallel_fitness_evaluation(trees):
+    """Parallelized fitness evaluation of the current generation."""
+    with Pool(cpu_count()) as pool:
+        results = pool.map(evaluate_tree, trees, chunksize=100)
+    return [result for result in results if result is not None]
+
+
 def evolution_step(current_generation=None, num_trees=100, function_set=None, action_set=None, max_depth=6, generation=0):
     if current_generation is None:
         current_generation = [
@@ -85,10 +105,6 @@ def evolution_step(current_generation=None, num_trees=100, function_set=None, ac
             for _ in range(num_trees)
         ]
 
-
-        
-
-    print("Current Generation", current_generation)
     tree_fitness = []
     for tree_data in current_generation:
         if isinstance(tree_data, tuple):
@@ -101,10 +117,13 @@ def evolution_step(current_generation=None, num_trees=100, function_set=None, ac
             fitness, score = run_game_with_tree(tree_data)
             tree_fitness.append((tree_data, fitness, score))
 
-    print("Tree Fitness Generation", tree_fitness)
+    # Extract only the trees for parallel evaluation
+    #tree_all = [tree_data[0] if isinstance(tree_data, tuple) else tree_data for tree_data in current_generation]
 
+    # Perform parallel fitness evaluation
+    #tree_fitness = parallel_fitness_evaluation(tree_all)
 
-    print(len(tree_fitness))
+    #print(len(tree_fitness))
     best_fitness = -1
     best_tree = -1
     best_score = -1
@@ -115,9 +134,9 @@ def evolution_step(current_generation=None, num_trees=100, function_set=None, ac
             best_fitness = fitness
             best_score = score
 
-    
-    print(f"Generation {generation}: Bester Score: {best_score}, Beste Fitness: {best_fitness}")
+
+    #print(f"Generation {generation}: Bester Score: {best_score}, Beste Fitness: {best_fitness}")
     winners = tournament_selection(tree_fitness)
-    print(len(winners))
+    #print(len(winners))
     current_generation = create_next_generation(winners, function_set, action_set, max_depth)
     return current_generation, best_fitness, best_score, best_tree

@@ -1,6 +1,6 @@
 
 
-def calculate_fitness(score, iterations, score_weight=1.0, time_weight=0.05, interation_weight=0.5):
+def calculate_fitness(score, iterations, score_weight=1, time_weight=0.2, interation_weight=0.5):
     """
     Berechnet die Fitness des Spiels basierend auf Score und Überlebenszeit.
 

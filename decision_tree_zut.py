@@ -1,6 +1,10 @@
 import random
 import matplotlib.pyplot as plt
 import networkx as nx
+import matplotlib
+matplotlib.use('TkAgg')  # Switch to TkAgg backend
+
+
 
 # Erzeuge Knoten im Entscheidungsbaum
 class DecisionTreeNode:
@@ -58,7 +62,7 @@ class DecisionTreeNode:
 
 
 # erstelle zufälligen Entscheidungsbaum
-def generate_random_dt(function_set, action_set, max_depth=6, current_depth=1, stop_probability=0.2, full_method=False):
+def generate_random_dt(function_set, action_set, max_depth=10, current_depth=1, stop_probability=0.2, full_method=False):
     """
     Generiere einen zufälligen Entscheidungsbaum mit der Option für Full- oder Grow-Methode.
     Die Grow-Methode generiert mindestens eine Bedingung vor einem Terminal.

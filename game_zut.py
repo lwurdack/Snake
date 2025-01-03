@@ -22,12 +22,19 @@ class snake:
 
     #Funktion, die immer neues Essen spanen lässt
     def generate_food(self):
-        while True:
-            # generiere zufällige Position von Essen innerhalb des Spielfeldes
-            food_position = (random.randint(0, self.size - 1), random.randint(0, self.size - 1))
+        # Create an independent RNG with a fixed seed
+        food_rng = random.Random(42)  # Fixed seed for deterministic food generation
 
-            # Prüfen, ob die Position nicht in der Schlange ist
-            if food_position not in self.snake:  
+        while True:
+            # Use the independent RNG for generating food position
+            food_position = (
+                food_rng.randint(0, self.size - 1),
+                food_rng.randint(0, self.size - 1)
+            )
+
+            # Ensure the food does not spawn on the snake
+            if food_position not in self.snake:
+                #print(food_position)
                 return food_position
 
 
